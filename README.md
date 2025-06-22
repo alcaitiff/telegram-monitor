@@ -53,11 +53,15 @@ TELEGRAM_USER_ID=your_user_id_here
 WATCHED_FOLDER=/watched
 ```
 
-### 5. Build the Docker Image
+### 5.1 Run the run.sh file
+
+This file will create the image and run it, or do manually the steps 5.2.1 and 5.2.2
+
+### 5.2.1 Build the Docker Image
 
 - docker build -t telegram-monitor .
 
-### 6. Run the Bot Container
+### 5.2.2. Run the Bot Container
 
 Replace /path/to/folder with the folder you want to monitor:
 
