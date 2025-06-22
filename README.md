@@ -55,7 +55,7 @@ WATCHED_FOLDER=/watched
 
 ### 5. Build the Docker Image
 
-- docker build -t telegram-watcher .
+- docker build -t telegram-monitor .
 
 ### 6. Run the Bot Container
 
@@ -65,8 +65,8 @@ Replace /path/to/folder with the folder you want to monitor:
 docker run -d \
   --env-file .env \
   -v /path/to/folder:/watched \
-  --name dir-watcher \
-  telegram-watcher
+  --name telegram-monitor \
+  telegram-monitor
 ```
 
 The bot will now monitor /path/to/folder and send any new files to your Telegram account.
@@ -79,22 +79,22 @@ If you want to monitor ~/Downloads/new-files, use:
 docker run -d \
   --env-file .env \
   -v $HOME/Downloads/new-files:/watched \
-  --name dir-watcher \
-  telegram-watcher
+  --name telegram-monitor \
+  telegram-monitor
 ```
 
 ### ✅ Tips
 
 - The bot only sends newly created files.
-- If you stop the container: docker stop dir-watcher
-- To remove: docker rm -f dir-watcher
+- If you stop the container: docker stop telegram-monitor
+- To remove: docker rm -f telegram-monitor
 
 ### 🧼 Optional: Auto Start on Boot
 
 To make the container start on reboot:
 
 ```bash
-docker update --restart unless-stopped dir-watcher
+docker update --restart unless-stopped telegram-monitor
 ```
 
 ### 🔒 Security Reminder
