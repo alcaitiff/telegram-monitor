@@ -1,5 +1,6 @@
 import os
 import time
+import asyncio
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 from telegram import Bot
@@ -18,20 +19,26 @@ class FileHandler(FileSystemEventHandler):
         if event.is_directory:
             return
 
-        time.sleep(1)  # Delay to ensure file is fully written
+        print(f"📁 New file detected: {event.src_path}")
+        time.sleep(1)  # Let the file finish writing
+
+        # Schedule the send_file coroutine to run in the event loop
+        asyncio.run(self.send_file(event.src_path))
+
+    async def send_file(self, filepath):
         try:
-            with open(event.src_path, 'rb') as f:
-                bot.send_document(chat_id=TELEGRAM_USER_ID, document=f, filename=os.path.basename(event.src_path))
-            print(f"Sent file: {event.src_path}")
+            with open(filepath, 'rb') as f:
+                await bot.send_document(chat_id=TELEGRAM_USER_ID, document=f, filename=os.path.basename(filepath))
+            print(f"✅ Sent file: {filepath}")
         except Exception as e:
-            print(f"Error sending {event.src_path}: {e}")
+            print(f"❌ Failed to send file: {filepath} — {e}")
 
 if __name__ == "__main__":
     event_handler = FileHandler()
     observer = Observer()
     observer.schedule(event_handler, WATCHED_FOLDER, recursive=False)
     observer.start()
-    print(f"Watching folder: {WATCHED_FOLDER}")
+    print(f"👀 Watching folder: {WATCHED_FOLDER}")
     try:
         while True:
             time.sleep(1)
