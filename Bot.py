@@ -4,6 +4,7 @@ import asyncio
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 from telegram import Bot
+from telegram.request import HTTPXRequest
 from dotenv import load_dotenv
 from threading import Thread
 from queue import Queue
@@ -15,7 +16,8 @@ TELEGRAM_USER_ID = int(os.getenv("TELEGRAM_USER_ID"))
 WATCHED_FOLDER = os.getenv("WATCHED_FOLDER", "/watched")
 
 # Init Telegram bot
-bot = Bot(token=TELEGRAM_TOKEN)
+request = HTTPXRequest(connect_timeout=10, read_timeout=30)
+bot = Bot(token=TELEGRAM_TOKEN, request=request)
 
 # Queue for new files
 file_queue = Queue()
@@ -35,10 +37,14 @@ async def send_files():
             if not await wait_until_stable(filepath):
                 print(f"⚠️ File not stable or timeout: {filepath}")
                 continue
+            
+            print(f"⏳ Waiting briefly before sending: {filepath}")
+            await asyncio.sleep(5)  # <-- give OS buffer time
 
             print(f"🚀 Sending file: {filepath}")
             with open(filepath, 'rb') as f:
                 await bot.send_document(chat_id=TELEGRAM_USER_ID, document=f, filename=os.path.basename(filepath))
+
             print(f"✅ Sent file: {filepath}")
         except Exception as e:
             print(f"❌ Error sending {filepath}: {e}")
@@ -79,7 +85,7 @@ def start_watchdog():
     print(f"👀 Watching folder: {WATCHED_FOLDER}")
     try:
         while True:
-            time.sleep(1)
+            time.sleep(5)
     except KeyboardInterrupt:
         observer.stop()
     observer.join()
